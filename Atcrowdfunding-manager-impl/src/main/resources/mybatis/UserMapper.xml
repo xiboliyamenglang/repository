@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.atguigu.atcrowdfunding.manager.dao.UserMapper">
+
+
+
+	<resultMap id="BaseResultMap" type="com.atguigu.atcrowdfunding.bean.User">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="loginacct" property="loginacct" jdbcType="VARCHAR" />
+		<result column="userpswd" property="userpswd" jdbcType="CHAR" />
+		<result column="username" property="username" jdbcType="VARCHAR" />
+		<result column="email" property="email" jdbcType="VARCHAR" />
+		<result column="createtime" property="createtime" jdbcType="CHAR" />
+	</resultMap>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from t_user
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+
+	<!-- useGeneratedKeys：是否让mybatis自动生成主键值
+		 keyProperty：自增主键的字段名
+	-->
+	<insert id="insert" parameterType="com.atguigu.atcrowdfunding.bean.User" useGeneratedKeys="true" keyProperty="id">
+		insert into t_user (id,
+		loginacct, userpswd,
+		username, email, createtime
+		)
+		values
+		(#{id,jdbcType=INTEGER}, #{loginacct,jdbcType=VARCHAR},
+		#{userpswd,jdbcType=CHAR},
+		#{username,jdbcType=VARCHAR},
+		#{email,jdbcType=VARCHAR}, #{createtime,jdbcType=CHAR}
+		)
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.atguigu.atcrowdfunding.bean.User">
+		update t_user
+		set
+		loginacct = #{loginacct,jdbcType=VARCHAR},
+		userpswd =
+		#{userpswd,jdbcType=CHAR},
+		username = #{username,jdbcType=VARCHAR},
+		email = #{email,jdbcType=VARCHAR},
+		createtime =
+		#{createtime,jdbcType=CHAR}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select id, loginacct, userpswd, username, email,
+		createtime
+		from t_user
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select id, loginacct, userpswd,
+		username, email, createtime
+		from t_user
+	</select>
+
+	<select id="selectByLoginacct" resultMap="BaseResultMap">
+		select id, loginacct, userpswd,
+		username, email, createtime
+		from t_user
+		where loginacct=#{loginacct}
+	</select>
+
+	<select id="queryUserlogin" parameterType="map" resultMap="BaseResultMap">
+		select id, loginacct, userpswd,
+		username, email, createtime
+		from t_user
+		where loginacct=#{loginacct} and userpswd=#{userpswd}
+	</select>
+
+	<!-- 过时老方法
+	<select id="selectAllCount" resultType="int">
+		select count(1)
+		from t_user
+	</select>
+
+	<select id="queryPage" resultMap="BaseResultMap">
+		select id, loginacct, userpswd,
+		username, email, createtime
+		from t_user
+		limit #{pageIndex},#{pagesize}
+	</select>-->
+
+	<!--
+		condition条件可以使用如下几个方法：
+		1、'%${condition}%'  —— 缺点是安全问题，可能会导致sql注入
+		2、concat("%",#{condition},"%")  —— 使用mysql的concat函数，不会导致外层接口的修改，该方法是最好的
+		3、在dao层传入condition之前，对condition进行双百分号的拼接（condition—>%condition%），该方法次之，会要修改java代码
+	-->
+	<select id="selectAllCount" resultType="int">
+		select count(1)
+		from t_user
+		<where>
+			<if test="condition != null">
+				loginacct like concat("%",#{condition},"%")
+			</if>
+		</where>
+	</select>
+
+	<select id="queryPage" resultMap="BaseResultMap">
+		select id, loginacct, userpswd,
+		username, email, createtime
+		from t_user
+		<where>
+			<if test="condition != null">
+				loginacct like concat("%",#{condition},"%")
+			</if>
+		</where>
+		order by createtime desc
+		limit #{startIndex},#{pagesize}
+	</select>
+
+</mapper>
